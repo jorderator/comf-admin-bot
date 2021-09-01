@@ -1,0 +1,15 @@
+# Ignore volatile gradle files 
+/.gradle/
+/build/
+
+# Ignore IDEA project files
+/.idea/
+
+# Ignore generated class files
+/out/
+
+# Ignore file for sending to running server
+#/send.sh
+
+# Also ignore the bot's json state file, wherever it is
+bot-state.json
