@@ -91,6 +91,7 @@ public class State {
                 if (botState.has("prefix")) prefix = botState.getString("prefix");
 
                 if (botState.has("modSuggestions")) {
+                    modSuggestions.clear();
                     JSONArray modSuggestionsTempArray = botState.getJSONArray("modSuggestions");
                     for (int i = 0; i < modSuggestionsTempArray.length(); i++) {
                         modSuggestions.add(modSuggestionsTempArray.getString(i));

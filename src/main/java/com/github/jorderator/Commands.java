@@ -181,9 +181,10 @@ public class Commands {
             channel.createEmbed(embedCreateSpec -> embedCreateSpec
                     .setTitle("Mod List Info")
                     .setColor(embedColour)
-                    .setDescription("This is the list of mods to be included in a modded minecraft server we'll run. " +
-                            "Use the commands below to interact with the list, and at the end we'll set up a server " +
-                            "as much as we can get working.")
+                    .setDescription("This is now the list of mods to be added to the server. Every now and then we'll " +
+                            "go through and add all these to the server. (Try not to explore too far because of this, " +
+                            "we want to leave stuff unloaded, so when we add mods we can still get their resources " +
+                            "without having to delete chunks from the world.)")
                     .addField("Commands:", "-------------------------", false)
                     .addField(State.prefix + "mod-info", "This thing.", true)
                     .addField(State.prefix + "mod-list", "List the current mod list.", true)
