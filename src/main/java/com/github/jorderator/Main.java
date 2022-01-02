@@ -1,3 +1,16 @@
+// ===============================================================================================
+//  Project Information:
+//   {blurb here}
+//
+//  General todo list:
+//  - LOTS MORE SEPARATION. Seperate file handling and runtime state, separate command classes in
+//     separate package, separate modular reaction role handling, separate primary features
+//     (secret santa, mod list, etc), go nuts. Embed handling to Util even?
+//  - Bot status stuff
+//  - Also this intro thing
+// ===============================================================================================
+
+
 package com.github.jorderator;
 
 import discord4j.core.DiscordClientBuilder;
@@ -7,11 +20,7 @@ import discord4j.core.event.domain.guild.MemberLeaveEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
-import discord4j.core.object.presence.Activity;
-import discord4j.discordjson.json.ActivityUpdateRequest;
-import discord4j.discordjson.json.gateway.StatusUpdate;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import discord4j.core.event.domain.message.ReactionRemoveEvent;
 
 import java.io.*;
 import java.util.Scanner;
@@ -20,12 +29,8 @@ public class Main {
 
     public static GatewayDiscordClient client;
 
-    // TODO: implement persistent configuration
-    // TODO: add support for prefix changing
-
     public static void onReady(ReadyEvent event) {
         System.out.println("ready bitches");
-        // TODO: idk, figure out statuses sometime
 //        ActivityUpdateRequest activity = Activity.playing("asdf");
 //        activity.
 //        client.updatePresence();
@@ -36,7 +41,7 @@ public class Main {
         Scanner in = new Scanner(System.in);
 
         // Get discord api token from a 'token.txt' file, in current working path
-        // TODO: Implement token system better
+        // TODO: Implement token system better (maybe? I guess maybe commandline argument?)
         String token = "";
         try {
             File tokenFile = new File("token.txt");
@@ -89,6 +94,7 @@ public class Main {
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(Listeners::messageCreated);
 
         client.getEventDispatcher().on(ReactionAddEvent.class).subscribe(Listeners::reactionAdded);
+        client.getEventDispatcher().on(ReactionRemoveEvent.class).subscribe(Listeners::reactionRemoved);
 
         client.getEventDispatcher().on(MemberJoinEvent.class).subscribe(Listeners::memberJoined);
         client.getEventDispatcher().on(MemberLeaveEvent.class).subscribe(Listeners::memberLeft);
@@ -109,45 +115,4 @@ public class Main {
 //            }
 //        }
     }
-
-//
-//    public static void saveState() {
-//        JSONObject botState = new JSONObject();
-//
-//        botState.put("stinkyToggle", State.stinkyToggle);
-//        botState.put("messageToggle", State.messageToggle);
-//
-//        botState.put("suggestions", State.suggestions);
-//
-//        try {
-//            FileWriter jsonFileWriter = new FileWriter(jsonStateFilePath);
-//            jsonFileWriter.write(botState.toString());
-//            jsonFileWriter.close();
-//        }
-//        catch (IOException e) {
-//            System.out.println("An error occurred.");
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    private static void loadState() throws IOException {
-//        File jsonFile = new File(jsonStateFilePath);
-//
-//        if (jsonFile.exists()) {
-//            Scanner jsonFileReader = new Scanner(jsonFile);
-//
-//            if (jsonFileReader.hasNext()) {
-//                JSONObject botState = new JSONObject(jsonFileReader.nextLine());
-//                JSONArray suggestionsTempArray = botState.getJSONArray("suggestions");
-//
-//                State.stinkyToggle = botState.getBoolean("stinkyToggle");
-//                State.messageToggle = botState.getBoolean("messageToggle");
-//
-//                for (int i = 0; i < suggestionsTempArray.length(); i++) {
-//                    State.suggestions.add(suggestionsTempArray.getString(i));
-//                }
-//            }
-//        }
-//    }
-
 }
