@@ -103,6 +103,7 @@ public class Main {
 
         System.out.println("listeners attached");
 
+//        System.out.println(Reactions.getReactionID("asdf"));
 
         client.onDisconnect().block();
 

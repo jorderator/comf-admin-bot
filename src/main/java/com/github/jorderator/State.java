@@ -59,6 +59,8 @@ public class State {
     public static void saveState() {
         JSONObject botState = new JSONObject();
 
+        botState.put("reactions", Reactions.toJSON());
+
         Map<String, Object> tempIds = new HashMap<>(ids);
         tempIds.remove("ownerID");
         botState.put("ids", tempIds);
@@ -96,6 +98,8 @@ public class State {
 
             if (jsonFileReader.hasNext()) {
                 JSONObject botState = new JSONObject(jsonFileReader.nextLine());
+
+                if (botState.has("reactions")) Reactions.fromJSON(botState.getJSONArray("reactions"));
 
                 if (botState.has("ids")) ids = botState.getJSONObject("ids").toMap();
                 ids.put("ownerID", Main.client.getApplicationInfo().block().getOwnerId().asLong());

@@ -64,78 +64,13 @@ public class Listeners {
     public static void reactionAdded(ReactionAddEvent event) {
         // TODO: Overhaul reaction roles stuff, have a seperate class or something, so ids can be set per reaction, and this can be made dynamic
         if (event.getUserId().asLong() != Main.client.getSelfId().asLong()) {
-            if (event.getChannelId().asLong() == State.getID("rulesChannelID")) {
-                Guild guild = event.getGuild().block();
-                Member member = event.getMember().get();
-
-                System.out.printf("%s added reaction to rules message.%n", member.getTag());
-
-                if (member.getRoleIds().contains(Snowflake.of((State.getIDList("defaultRoleIDs")).get(0)))) {
-                    System.out.println(member.getDisplayName() + " already had the role.");
-                    return;
-                }
-
-                for (Long defaultRoleID : State.getIDList("defaultRoleIDs")) {
-                    Role defaultRole = guild.getRoleById(Snowflake.of(defaultRoleID)).block();
-//                System.out.println(defaultRole);
-                    if (defaultRole.equals(null)) {
-                        System.out.printf("uhh, shit, no role for %s boss%n", defaultRoleID);
-                        return;
-                    }
-
-                    member.addRole(Snowflake.of(defaultRoleID)).block();
-                }
-
-                System.out.println("roles assigned for " + member.getTag());
-            }
-
-
-            //  Secret santa stuff
-            if (State.secretSantaActive && State.secretSantaOptIn && event.getMessageId().asLong() == State.getID("secretSantaMessageID") && event.getEmoji().equals(ReactionEmoji.codepoints("U+1F385"))) {
-                Snowflake roleID = Snowflake.of(State.getID("secretSantaRoleID"));
-                Member member = event.getMember().get();
-
-                System.out.printf("%s added reaction to secret santa message.%n", member.getTag());
-
-                if (member.getRoleIds().contains(roleID)) {
-                    System.out.println(member.getDisplayName() + " already had the role.");
-                    return;
-                }
-
-                Role role = event.getGuild().block().getRoleById(roleID).block();
-                if (role.equals(null)) {
-                    System.out.printf("uhh, shit, no role for %s boss%n", role);
-                    return;
-                }
-
-                member.addRole(roleID).block();
-
-                System.out.println("secret santa role assigned for " + member.getTag());
-            }
+            Reactions.processReaction(event);
         }
     }
 
     public static void reactionRemoved(ReactionRemoveEvent event) {
         if (event.getUserId().asLong() != Main.client.getSelfId().asLong()) {
-            if (State.secretSantaActive && State.secretSantaOptIn && event.getMessageId().asLong() == State.getID("secretSantaMessageID") && event.getEmoji().equals(ReactionEmoji.codepoints("U+1F385"))) {
-                Snowflake roleID = Snowflake.of(State.getID("secretSantaRoleID"));
-                Member member = event.getUser().block().asMember(event.getGuildId().get()).block();
-
-                System.out.printf("%s removed their reaction from the secret santa message.%n", member.getTag());
-
-                if (!member.getRoleIds().contains(roleID)) {
-                    System.out.println(member.getDisplayName() + " already had the role removed.");
-                    return;
-                }
-
-                Role role = event.getGuild().block().getRoleById(roleID).block();
-                if (role.equals(null)) {
-                    System.out.printf("uhh, shit, no role for %s boss%n", role);
-                    return;
-                }
-
-                member.removeRole(roleID).block();
-            }
+            Reactions.processReaction(event);
         }
     }
 

@@ -7,6 +7,7 @@ import discord4j.core.object.Invite;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.rest.http.client.ClientException;
 import discord4j.rest.util.Color;
 
 import java.io.IOException;
@@ -20,6 +21,8 @@ public class Commands {
 
 //    private static Pattern suggestPattern;
 //    private static Pattern delsuggestPattern;
+//    private static Pattern addRoleReactionPattern;
+
     private static Pattern testListPattern;
 
     private static Pattern addModPattern;
@@ -33,8 +36,8 @@ public class Commands {
     private static Pattern messageSantaPattern;
     private static Pattern messagePartnerPattern;
     static {
-//        suggestPattern = Pattern.compile("^\\" + State.prefix + "suggest (.+)$");
-//        delsuggestPattern = Pattern.compile("^\\" + State.prefix + "delsuggest ([0-9]+)$");
+//        addRoleReactionPattern = Pattern.compile("^\\" + State.prefix + "add-role-reaction ([^ ]+) ([^ ]+) (.+)");
+
         testListPattern = Pattern.compile("^\\" + State.prefix + "add-test (.+)$");
 
         addModPattern = Pattern.compile("^\\" + State.prefix + "add-mod (.+)$");
@@ -200,6 +203,16 @@ public class Commands {
                 return true;
             }
 
+            // save bot state for debugging
+            if (content.equals(State.prefix + "save-state")) {
+                State.saveState();
+
+                channel.createMessage("Bot state saved").block();
+                System.out.println("state saved");
+            }
+
+
+            // Secret santa commands:
 
             if (State.secretSantaActive && content.equals(State.prefix + "begin-secret-santa")) {
                 SecretSanta.beginSecretSanta();
@@ -223,6 +236,8 @@ public class Commands {
                 }).block();
             }
 
+
+            // Colour commands:
 
             m = setColourPattern.matcher(content);
             if (m.find()) {
@@ -324,6 +339,73 @@ public class Commands {
         // ===== End DM only commands =====
 
 
+        if (content.startsWith(State.prefix + "add-role-reaction")) {
+            Pattern linkPattern = Pattern.compile("https://discord.com/channels/(?:@me|[0-9]+)/[0-9]+/[0-9]+");
+            Pattern emojiPattern = Pattern.compile(" ([^\\s]+)$");
+            Pattern removableOptionPattern = Pattern.compile("\\sr\\s");
+
+            Matcher linkMatcher = linkPattern.matcher(content);
+            Matcher emojiMatcher = emojiPattern.matcher(content);
+            Matcher removableOptionMatcher = removableOptionPattern.matcher(content);
+
+            Message message = event.getMessage();
+            Message targetMessage = null;
+            if (linkMatcher.find())
+                targetMessage = Util.getMessage(linkMatcher.group()).orElse(null);
+
+            if (targetMessage == null && !message.getReferencedMessage().isPresent()) {
+                channel.createEmbed(embedCreateSpec -> {
+                    Util.formatEmbed(channel, embedCreateSpec);
+                    embedCreateSpec
+                            .setTitle("No Message Found.")
+                            .setDescription("I couldn't find any valid message. Please either link a valid message, or reply to the message.");
+                }).block();
+            }
+            else if (message.getRoleMentionIds().isEmpty()) {
+                channel.createEmbed(embedCreateSpec -> {
+                    Util.formatEmbed(channel, embedCreateSpec);
+                    embedCreateSpec
+                            .setTitle("No Roles Found.")
+                            .setDescription("Please mention all roles you want in the message.");
+                }).block();
+            }
+            else if (!emojiMatcher.find()) {
+                channel.createEmbed(embedCreateSpec -> {
+                    Util.formatEmbed(channel, embedCreateSpec);
+                    embedCreateSpec
+                            .setTitle("No Emoji Found.")
+                            .setDescription("Put the emoji you want to use at the end of the command.");
+                }).block();
+            }
+            else {
+                if (targetMessage == null) targetMessage = message.getReferencedMessage().get();
+                String stringEmoji = emojiMatcher.group(1);
+                System.out.println("Emoji found?: " + stringEmoji);
+
+                try {
+                    Reactions.addRoleReaction(targetMessage, message.getRoleMentionIds(), Util.getEmoji(stringEmoji), removableOptionMatcher.find());
+                    State.saveState();
+
+                    channel.createEmbed(embedCreateSpec -> {
+                        Util.formatEmbed(channel, embedCreateSpec);
+                        String roles = "";
+                        for (Role role : message.getRoleMentions().toIterable()) {
+                            roles += " - " + role.getMention();
+                        }
+                        embedCreateSpec
+                                .setTitle("Role Reaction created.")
+                                .setDescription("A reaction of " + stringEmoji + " has been added for the following roles:\n" + roles);
+                    }).block();
+                } catch (ClientException e) {
+                    channel.createEmbed(embedCreateSpec -> {
+                        Util.formatEmbed(channel, embedCreateSpec);
+                        embedCreateSpec
+                                .setTitle("Invalid emoji")
+                                .setDescription("Discord didn't like that emoji. Put the emoji you want to use at the end of the command.");
+                    }).block();
+                }
+            }
+        }
 
         // print info about secret santa event
         if (State.secretSantaActive && !State.secretSantaOptIn && content.equals(State.prefix + "secret-santa-info")) {
