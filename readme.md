@@ -13,14 +13,29 @@ by the application, so where there isn't a command, it might be in that, applied
 The initial commit times on this are a bit misleading because I may or may not have had 
 to rebase everything to remove hard-coded IDs before making it public... oops.
 
+## Features
+
+The primary features of the bot, among more minor things, are as follows:
+
+ - Single use invite generation with optional "reason" text for audit logs.
+ - Dynamic role-reaction system, for creating roles self-assignable by reactions on a message.
+ - Secret Santa functions, for a yearly group christmas event. This includes random assigning 
+    of partners, anonymous messaging, and self management of participation through the role-
+    reaction system.
+ - Persistent storage of state to a generated and editable JSON file.
+
 ## Plans
 
-My next main goal is to rebuild the reaction role stuff. Continuing to hard-code 
-every instance I need a reaction thing won't work, so I want to make something dynamic, 
-preferably configurable with commands, not just editing `bot-status.json`.
+I want to continue refactoring the project, moving commands or sets of commands to separate 
+class files, remove the old ID system as it stands, with commands to make more dynamic the last 
+required parts such as primary server ID, announcement channels, etc. 
 
-As part of that I will probably overhaul the ID system to be more dynamic too, with 
-commands to gather all the IDs for a given thing.
+I also want to continue developing the reaction system, including to add response-type functions, 
+such as a message with multiple reactions serving as buttons or options to be selected. This 
+will also entail a system for multi-stage commands and functions, not just a single response to 
+a single command, but a process of multiple responses with persistent state.
+
+Also better documentation, commenting etc. The eternal struggle.
 
 ## Development
 
